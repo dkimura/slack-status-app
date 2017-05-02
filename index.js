@@ -4,10 +4,10 @@ const emoji = require('node-emoji');
 
 let window;
 const token = process.env.SLACK_TOKEN || '';
-const { TouchBarPopover, TouchBarButton, TouchBarSlider } = TouchBar;
+const { TouchBarButton } = TouchBar;
 
 const updateSlackStatus = (value) => {
-  if (!token) return;
+  if (!token) throw Error('please set slack token');
 
   axios
     .get('https://slack.com/api/users.profile.set', {
@@ -17,22 +17,35 @@ const updateSlackStatus = (value) => {
     .catch(error => console.log(error));
 };
 
-const touchBarButton = () => {
-  const value = emoji.random();
+const setTouchBar = touchBar => window.setTouchBar(touchBar);
 
+const createTouchBarButton = () => {
+  const value = emoji.random();
   return new TouchBarButton({
     label: value.emoji,
     click: () => updateSlackStatus(`:${value.key}:`),
   });
 };
 
-const touchBar = new TouchBar([
-  touchBarButton(),
-  touchBarButton(),
-  touchBarButton(),
-  touchBarButton(),
-  touchBarButton(),
-]);
+const createTouchBarButtons = () => [
+  createTouchBarButton(),
+  createTouchBarButton(),
+  createTouchBarButton(),
+  createTouchBarButton(),
+  createTouchBarButton(),
+  createTouchBarButton(),
+  createTouchBarButton(),
+];
+
+const createTouchBar = touchBarButtons => new TouchBar(touchBarButtons);
+
+const createReloadBarButton = () => new TouchBarButton({
+  label: 'Reload',
+  click: () => setTouchBar(createTouchBar([
+    ...createTouchBarButtons(),
+    createReloadBarButton(),
+  ])),
+});
 
 app.once('ready', () => {
   window = new BrowserWindow({
@@ -42,5 +55,9 @@ app.once('ready', () => {
     frame: false,
   });
   window.loadURL('about:blank');
-  window.setTouchBar(touchBar);
+
+  setTouchBar(createTouchBar([
+    ...createTouchBarButtons(),
+    createReloadBarButton(),
+  ]));
 });
