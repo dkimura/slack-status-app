@@ -3,3 +3,20 @@ plugins:
   - react
   - jsx-a11y
   - import
+env:
+  browser: true
+  jest: true
+settings:
+  import/resolver:
+    webpack:
+      config": webpack.config.js
+rules:
+  global-require: 0
+  import/no-extraneous-dependencies:
+    - error
+    - devDependencies: true
+  react/jsx-filename-extension:
+    - 2
+    - extensions:
+      - .js
+      - .jsx
